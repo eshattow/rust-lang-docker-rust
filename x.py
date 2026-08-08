@@ -262,10 +262,7 @@ def update_nightly_ci():
 
     versions = ""
     for release in debian_releases:
-        platforms = []
-        for arch in release.arches:
-            platforms.append(f"{arch.qemu}")
-        platforms = ",".join(platforms)
+        platforms = ",".join(arch.qemu for arch in release.arches)
 
         tags = [f"nightly-{release.name}"]
         if release.name == latest_debian_release:
@@ -286,10 +283,7 @@ def update_nightly_ci():
             versions += f"              {tag}-slim\n"
 
     for version in alpine_versions:
-        platforms = []
-        for arch in alpine_arches:
-            platforms.append(f"{arch.qemu}")
-        platforms = ",".join(platforms)
+        platforms = ",".join(arch.qemu for arch in alpine_arches)
 
         tags = [f"nightly-alpine{version}"]
         if version == latest_alpine_version:
