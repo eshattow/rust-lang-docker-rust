@@ -47,16 +47,15 @@ debian_trixie_arches = [
     DebianArch("riscv64", "riscv64", "linux/riscv64", "riscv64gc-unknown-linux-gnu"),
 ]
 
-latest_debian_release = "trixie"
-
 class DebianRelease(NamedTuple):
     name: str
     arches: list[DebianArch]
+    is_latest: bool = False
  
 debian_releases = [
     DebianRelease("bullseye", debian_lts_arches),
     DebianRelease("bookworm", debian_lts_arches + debian_non_lts_arches),
-    DebianRelease(latest_debian_release, debian_lts_arches + debian_non_lts_arches + debian_trixie_arches),
+    DebianRelease("trixie", debian_lts_arches + debian_non_lts_arches + debian_trixie_arches, is_latest=True),
 ]
 
 AlpineArch = namedtuple("AlpineArch", ["bashbrew", "apk", "qemu", "rust"])
@@ -228,7 +227,7 @@ def update_mirror_stable_ci():
         for version_tag in version_tags():
             tags.append(f"{version_tag}-{release.name}")
         tags.append(release.name)
-        if release.name == latest_debian_release:
+        if release.is_latest:
             for version_tag in version_tags():
                 tags.append(version_tag)
             tags.append("latest")
@@ -242,7 +241,7 @@ def update_mirror_stable_ci():
         for version_tag in version_tags():
             tags.append(f"{version_tag}-slim-{release.name}")
         tags.append(f"slim-{release.name}")
-        if release.name == latest_debian_release:
+        if release.is_latest:
             for version_tag in version_tags():
                 tags.append(f"{version_tag}-slim")
             tags.append("slim")
@@ -268,7 +267,7 @@ def update_nightly_ci():
         platforms = ",".join(arch.qemu for arch in release.arches)
 
         tags = [f"nightly-{release.name}"]
-        if release.name == latest_debian_release:
+        if release.is_latest:
             tags.append("nightly")
 
         versions += f"          - name: {release.name}\n"
@@ -344,7 +343,7 @@ GitRepo: https://github.com/rust-lang/docker-rust.git
         for version_tag in version_tags():
             tags.append(f"{version_tag}-{release.name}")
         tags.append(release.name)
-        if release.name == latest_debian_release:
+        if release.is_latest:
             for version_tag in version_tags():
                 tags.append(version_tag)
             tags.append("latest")
@@ -360,7 +359,7 @@ GitRepo: https://github.com/rust-lang/docker-rust.git
         for version_tag in version_tags():
             tags.append(f"{version_tag}-slim-{release.name}")
         tags.append(f"slim-{release.name}")
-        if release.name == latest_debian_release:
+        if release.is_latest:
             for version_tag in version_tags():
                 tags.append(f"{version_tag}-slim")
             tags.append("slim")
