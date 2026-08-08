@@ -31,20 +31,30 @@ supported_channels = [
 
 DebianArch = namedtuple("DebianArch", ["bashbrew", "dpkg", "qemu", "rust"])
 
+debian_arches = {
+    "amd64": DebianArch("amd64", "amd64", "linux/amd64", "x86_64-unknown-linux-gnu"),
+    "arm32v7": DebianArch("arm32v7", "armhf", "linux/arm/v7", "armv7-unknown-linux-gnueabihf"),
+    "arm64v8": DebianArch("arm64v8", "arm64", "linux/arm64", "aarch64-unknown-linux-gnu"),
+    "i386": DebianArch("i386", "i386", "linux/386", "i686-unknown-linux-gnu"),
+    "ppc64le": DebianArch("ppc64le", "ppc64el", "linux/ppc64le", "powerpc64le-unknown-linux-gnu"),
+    "riscv64": DebianArch("riscv64", "riscv64", "linux/riscv64", "riscv64gc-unknown-linux-gnu"),
+    "s390x": DebianArch("s390x", "s390x", "linux/s390x", "s390x-unknown-linux-gnu"),
+}
+
 debian_lts_arches = [
-    DebianArch("amd64", "amd64", "linux/amd64", "x86_64-unknown-linux-gnu"),
-    DebianArch("arm32v7", "armhf", "linux/arm/v7", "armv7-unknown-linux-gnueabihf"),
-    DebianArch("arm64v8", "arm64", "linux/arm64", "aarch64-unknown-linux-gnu"),
-    DebianArch("i386", "i386", "linux/386", "i686-unknown-linux-gnu"),
+    debian_arches["amd64"],
+    debian_arches["arm32v7"],
+    debian_arches["arm64v8"],
+    debian_arches["i386"],
 ]
 
 debian_non_lts_arches = [
-    DebianArch("ppc64le", "ppc64el", "linux/ppc64le", "powerpc64le-unknown-linux-gnu"),
-    DebianArch("s390x", "s390x", "linux/s390x", "s390x-unknown-linux-gnu"),
+    debian_arches["ppc64le"],
+    debian_arches["s390x"],
 ]
 
 debian_trixie_arches = [
-    DebianArch("riscv64", "riscv64", "linux/riscv64", "riscv64gc-unknown-linux-gnu"),
+    debian_arches["riscv64"],
 ]
 
 class DebianRelease(NamedTuple):
