@@ -42,26 +42,30 @@ debian_arches = {
 }
 
 debian_lts_arches = [
-    debian_arches["amd64"],
-    debian_arches["arm32v7"],
-    debian_arches["arm64v8"],
-    debian_arches["i386"],
+    "amd64",
+    "arm32v7",
+    "arm64v8",
+    "i386",
 ]
 
 debian_non_lts_arches = [
-    debian_arches["ppc64le"],
-    debian_arches["s390x"],
+    "ppc64le",
+    "s390x",
 ]
 
 debian_trixie_arches = [
-    debian_arches["riscv64"],
+    "riscv64",
 ]
 
 class DebianRelease(NamedTuple):
     name: str
-    arches: list[DebianArch]
+    arch_names: list[str]
     is_latest: bool = False
- 
+
+    @property
+    def arches(self) -> list[DebianArch]:
+        return [debian_arches[name] for name in self.arch_names]
+
 debian_releases = [
     DebianRelease("bullseye", debian_lts_arches),
     DebianRelease("bookworm", debian_lts_arches + debian_non_lts_arches),
