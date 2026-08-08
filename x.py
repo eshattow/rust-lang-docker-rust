@@ -2,6 +2,7 @@
 
 import argparse
 from collections import namedtuple
+from typing import NamedTuple
 from urllib import request
 import os
 import subprocess
@@ -48,7 +49,9 @@ debian_trixie_arches = [
 
 latest_debian_release = "trixie"
 
-DebianRelease = namedtuple("DebianRelease", ["name", "arches"])
+class DebianRelease(NamedTuple):
+    name: str
+    arches: list[DebianArch]
  
 debian_releases = [
     DebianRelease("bullseye", debian_lts_arches),
