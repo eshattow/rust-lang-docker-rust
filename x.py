@@ -346,11 +346,11 @@ GitRepo: https://github.com/rust-lang/docker-rust.git
                 tags.append(version_tag)
             tags.append("latest")
 
-        arches = release.arches[:]
+        bashbrews = [a.bashbrew for a in release.arches]
 
         library += single_library(
                 tags,
-                map(lambda a: a.bashbrew, arches),
+                bashbrews,
                 os.path.join(stable.name, release.name))
 
         tags = []
@@ -364,7 +364,7 @@ GitRepo: https://github.com/rust-lang/docker-rust.git
 
         library += single_library(
                 tags,
-                map(lambda a: a.bashbrew, arches),
+                bashbrews,
                 os.path.join(stable.name, release.name, "slim"))
 
     for version in alpine_versions:
@@ -379,7 +379,7 @@ GitRepo: https://github.com/rust-lang/docker-rust.git
 
         library += single_library(
             tags,
-            map(lambda a: a.bashbrew, alpine_arches),
+            [a.bashbrew for a in alpine_arches],
             os.path.join(stable.name, f"alpine{version}"))
 
     print(library)
