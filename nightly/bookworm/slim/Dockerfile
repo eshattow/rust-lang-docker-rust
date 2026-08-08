@@ -40,10 +40,6 @@ RUN set -eux; \
             rustArch='powerpc64le-unknown-linux-gnu'; \
             rustupSha256='4bfff85bd3967d988e14567aa9cc6ab0ea386f0ffeff0f9f14d23f0103bf1f97'; \
             ;; \
-        's390x') \
-            rustArch='s390x-unknown-linux-gnu'; \
-            rustupSha256='66c2c132428b6b77803facb02cbdf33b89d20c00bd20da142be8cb651f2e7cd8'; \
-            ;; \
         *) \
             echo >&2 "unsupported architecture: $arch"; \
             exit 1; \

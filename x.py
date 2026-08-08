@@ -2,6 +2,7 @@
 
 import argparse
 from collections import namedtuple
+from typing import NamedTuple
 from urllib import request
 import os
 import subprocess
@@ -30,30 +31,29 @@ supported_channels = [
 
 DebianArch = namedtuple("DebianArch", ["bashbrew", "dpkg", "qemu", "rust"])
 
-debian_lts_arches = [
-    DebianArch("amd64", "amd64", "linux/amd64", "x86_64-unknown-linux-gnu"),
-    DebianArch("arm32v7", "armhf", "linux/arm/v7", "armv7-unknown-linux-gnueabihf"),
-    DebianArch("arm64v8", "arm64", "linux/arm64", "aarch64-unknown-linux-gnu"),
-    DebianArch("i386", "i386", "linux/386", "i686-unknown-linux-gnu"),
-]
+debian_arches = {
+    "amd64": DebianArch("amd64", "amd64", "linux/amd64", "x86_64-unknown-linux-gnu"),
+    "arm32v7": DebianArch("arm32v7", "armhf", "linux/arm/v7", "armv7-unknown-linux-gnueabihf"),
+    "arm64v8": DebianArch("arm64v8", "arm64", "linux/arm64", "aarch64-unknown-linux-gnu"),
+    "i386": DebianArch("i386", "i386", "linux/386", "i686-unknown-linux-gnu"),
+    "ppc64le": DebianArch("ppc64le", "ppc64el", "linux/ppc64le", "powerpc64le-unknown-linux-gnu"),
+    "riscv64": DebianArch("riscv64", "riscv64", "linux/riscv64", "riscv64gc-unknown-linux-gnu"),
+    "s390x": DebianArch("s390x", "s390x", "linux/s390x", "s390x-unknown-linux-gnu"),
+}
 
-debian_non_lts_arches = [
-    DebianArch("ppc64le", "ppc64el", "linux/ppc64le", "powerpc64le-unknown-linux-gnu"),
-    DebianArch("s390x", "s390x", "linux/s390x", "s390x-unknown-linux-gnu"),
-]
+class DebianRelease(NamedTuple):
+    name: str
+    arch_names: list[str]
+    is_latest: bool = False
 
-debian_trixie_arches = [
-    DebianArch("riscv64", "riscv64", "linux/riscv64", "riscv64gc-unknown-linux-gnu"),
-]
+    @property
+    def arches(self) -> list[DebianArch]:
+        return [debian_arches[name] for name in self.arch_names]
 
-latest_debian_release = "trixie"
-
-DebianRelease = namedtuple("DebianRelease", ["name", "arches"])
- 
 debian_releases = [
-    DebianRelease("bullseye", debian_lts_arches),
-    DebianRelease("bookworm", debian_lts_arches + debian_non_lts_arches),
-    DebianRelease(latest_debian_release, debian_lts_arches + debian_non_lts_arches + debian_trixie_arches),
+    DebianRelease("bullseye", ["amd64", "arm32v7", "arm64v8", "i386"]),
+    DebianRelease("bookworm", ["amd64", "arm32v7", "arm64v8", "i386", "ppc64le"]),
+    DebianRelease("trixie", ["amd64", "arm32v7", "arm64v8", "i386", "ppc64le", "s390x", "riscv64"], is_latest=True),
 ]
 
 AlpineArch = namedtuple("AlpineArch", ["bashbrew", "apk", "qemu", "rust"])
@@ -225,7 +225,7 @@ def update_mirror_stable_ci():
         for version_tag in version_tags():
             tags.append(f"{version_tag}-{release.name}")
         tags.append(release.name)
-        if release.name == latest_debian_release:
+        if release.is_latest:
             for version_tag in version_tags():
                 tags.append(version_tag)
             tags.append("latest")
@@ -239,7 +239,7 @@ def update_mirror_stable_ci():
         for version_tag in version_tags():
             tags.append(f"{version_tag}-slim-{release.name}")
         tags.append(f"slim-{release.name}")
-        if release.name == latest_debian_release:
+        if release.is_latest:
             for version_tag in version_tags():
                 tags.append(f"{version_tag}-slim")
             tags.append("slim")
@@ -262,13 +262,10 @@ def update_nightly_ci():
 
     versions = ""
     for release in debian_releases:
-        platforms = []
-        for arch in release.arches:
-            platforms.append(f"{arch.qemu}")
-        platforms = ",".join(platforms)
+        platforms = ",".join(arch.qemu for arch in release.arches)
 
         tags = [f"nightly-{release.name}"]
-        if release.name == latest_debian_release:
+        if release.is_latest:
             tags.append("nightly")
 
         versions += f"          - name: {release.name}\n"
@@ -286,10 +283,7 @@ def update_nightly_ci():
             versions += f"              {tag}-slim\n"
 
     for version in alpine_versions:
-        platforms = []
-        for arch in alpine_arches:
-            platforms.append(f"{arch.qemu}")
-        platforms = ",".join(platforms)
+        platforms = ",".join(arch.qemu for arch in alpine_arches)
 
         tags = [f"nightly-alpine{version}"]
         if version == latest_alpine_version:
@@ -347,30 +341,30 @@ GitRepo: https://github.com/rust-lang/docker-rust.git
         for version_tag in version_tags():
             tags.append(f"{version_tag}-{release.name}")
         tags.append(release.name)
-        if release.name == latest_debian_release:
+        if release.is_latest:
             for version_tag in version_tags():
                 tags.append(version_tag)
             tags.append("latest")
 
-        arches = release.arches[:]
+        bashbrews = [a.bashbrew for a in release.arches]
 
         library += single_library(
                 tags,
-                map(lambda a: a.bashbrew, arches),
+                bashbrews,
                 os.path.join(stable.name, release.name))
 
         tags = []
         for version_tag in version_tags():
             tags.append(f"{version_tag}-slim-{release.name}")
         tags.append(f"slim-{release.name}")
-        if release.name == latest_debian_release:
+        if release.is_latest:
             for version_tag in version_tags():
                 tags.append(f"{version_tag}-slim")
             tags.append("slim")
 
         library += single_library(
                 tags,
-                map(lambda a: a.bashbrew, arches),
+                bashbrews,
                 os.path.join(stable.name, release.name, "slim"))
 
     for version in alpine_versions:
@@ -385,7 +379,7 @@ GitRepo: https://github.com/rust-lang/docker-rust.git
 
         library += single_library(
             tags,
-            map(lambda a: a.bashbrew, alpine_arches),
+            [a.bashbrew for a in alpine_arches],
             os.path.join(stable.name, f"alpine{version}"))
 
     print(library)

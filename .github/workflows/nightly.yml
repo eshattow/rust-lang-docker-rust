@@ -34,12 +34,12 @@ jobs:
               nightly-bullseye-slim
           - name: bookworm
             context: nightly/bookworm
-            platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le,linux/s390x
+            platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le
             tags: |
               nightly-bookworm
           - name: slim-bookworm
             context: nightly/bookworm/slim
-            platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le,linux/s390x
+            platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le
             tags: |
               nightly-bookworm-slim
           - name: trixie
