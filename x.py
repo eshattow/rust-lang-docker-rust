@@ -41,22 +41,6 @@ debian_arches = {
     "s390x": DebianArch("s390x", "s390x", "linux/s390x", "s390x-unknown-linux-gnu"),
 }
 
-debian_lts_arches = [
-    "amd64",
-    "arm32v7",
-    "arm64v8",
-    "i386",
-]
-
-debian_non_lts_arches = [
-    "ppc64le",
-    "s390x",
-]
-
-debian_trixie_arches = [
-    "riscv64",
-]
-
 class DebianRelease(NamedTuple):
     name: str
     arch_names: list[str]
@@ -67,9 +51,9 @@ class DebianRelease(NamedTuple):
         return [debian_arches[name] for name in self.arch_names]
 
 debian_releases = [
-    DebianRelease("bullseye", debian_lts_arches),
-    DebianRelease("bookworm", debian_lts_arches + debian_non_lts_arches),
-    DebianRelease("trixie", debian_lts_arches + debian_non_lts_arches + debian_trixie_arches, is_latest=True),
+    DebianRelease("bullseye", ["amd64", "arm32v7", "arm64v8", "i386"]),
+    DebianRelease("bookworm", ["amd64", "arm32v7", "arm64v8", "i386", "ppc64le", "s390x"]),
+    DebianRelease("trixie", ["amd64", "arm32v7", "arm64v8", "i386", "ppc64le", "s390x", "riscv64"], is_latest=True),
 ]
 
 AlpineArch = namedtuple("AlpineArch", ["bashbrew", "apk", "qemu", "rust"])
